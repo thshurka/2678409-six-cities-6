@@ -7,6 +7,8 @@ type OffersListProps = {
 };
 
 function OffersList({ offers }: OffersListProps): JSX.Element {
+  // activeOfferId понадобится для подсветки маркера на карте (следующее задание)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_activeOfferId, setActiveOfferId] = useState<number | null>(null);
 
   return (
