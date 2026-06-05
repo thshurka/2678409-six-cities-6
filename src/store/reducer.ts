@@ -1,7 +1,8 @@
 import { createReducer } from '@reduxjs/toolkit';
-import { changeCity, fillOffers, setAuthorizationStatus } from './action';
-import { fetchOffers, checkAuth, login, logout } from './api-actions';
-import { Offer } from '../types/offer';
+import { changeCity, fillOffers, setAuthorizationStatus, clearOfferData } from './action';
+import { fetchOffers, fetchOffer, fetchNearbyOffers, fetchReviews, submitReview, checkAuth, login, logout } from './api-actions';
+import { Offer, DetailedOffer } from '../types/offer';
+import { Review } from '../types/review';
 import { UserData } from '../types/user';
 import { AuthorizationStatus } from '../types/auth';
 import { DEFAULT_CITY } from '../const';
@@ -12,6 +13,11 @@ type State = {
   isLoading: boolean;
   authorizationStatus: AuthorizationStatus;
   userData: UserData | null;
+  currentOffer: DetailedOffer | null;
+  nearbyOffers: Offer[];
+  reviews: Review[];
+  isOfferLoading: boolean;
+  hasOfferLoadError: boolean;
 };
 
 const initialState: State = {
@@ -20,6 +26,11 @@ const initialState: State = {
   isLoading: false,
   authorizationStatus: AuthorizationStatus.Unknown,
   userData: null,
+  currentOffer: null,
+  nearbyOffers: [],
+  reviews: [],
+  isOfferLoading: false,
+  hasOfferLoadError: false,
 };
 
 const reducer = createReducer(initialState, (builder) => {
@@ -33,6 +44,12 @@ const reducer = createReducer(initialState, (builder) => {
     .addCase(setAuthorizationStatus, (state, action) => {
       state.authorizationStatus = action.payload;
     })
+    .addCase(clearOfferData, (state) => {
+      state.currentOffer = null;
+      state.nearbyOffers = [];
+      state.reviews = [];
+      state.hasOfferLoadError = false;
+    })
     .addCase(fetchOffers.pending, (state) => {
       state.isLoading = true;
     })
@@ -42,6 +59,27 @@ const reducer = createReducer(initialState, (builder) => {
     })
     .addCase(fetchOffers.rejected, (state) => {
       state.isLoading = false;
+    })
+    .addCase(fetchOffer.pending, (state) => {
+      state.isOfferLoading = true;
+      state.hasOfferLoadError = false;
+    })
+    .addCase(fetchOffer.fulfilled, (state, action) => {
+      state.currentOffer = action.payload;
+      state.isOfferLoading = false;
+    })
+    .addCase(fetchOffer.rejected, (state) => {
+      state.isOfferLoading = false;
+      state.hasOfferLoadError = true;
+    })
+    .addCase(fetchNearbyOffers.fulfilled, (state, action) => {
+      state.nearbyOffers = action.payload.slice(0, 3);
+    })
+    .addCase(fetchReviews.fulfilled, (state, action) => {
+      state.reviews = action.payload;
+    })
+    .addCase(submitReview.fulfilled, (state, action) => {
+      state.reviews = action.payload;
     })
     .addCase(checkAuth.fulfilled, (state, action) => {
       state.authorizationStatus = AuthorizationStatus.Auth;

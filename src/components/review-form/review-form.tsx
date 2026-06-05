@@ -1,33 +1,46 @@
 import { useState } from 'react';
+import { useAppDispatch } from '../../hooks';
+import { submitReview } from '../../store/api-actions';
 
-type ReviewFormState = {
-  rating: number;
-  text: string;
+type ReviewFormProps = {
+  offerId: string;
 };
 
-function ReviewForm(): JSX.Element {
-  const [formState, setFormState] = useState<ReviewFormState>({
-    rating: 0,
-    text: ''
-  });
+const MIN_COMMENT_LENGTH = 50;
+const MAX_COMMENT_LENGTH = 300;
 
-  const handleRatingChange = (newRating: number) => {
-    setFormState({ ...formState, rating: newRating });
-  };
+const STAR_TITLES = ['terribly', 'badly', 'not bad', 'good', 'perfect'];
 
-  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setFormState({ ...formState, text: e.target.value });
-  };
+function ReviewForm({ offerId }: ReviewFormProps): JSX.Element {
+  const dispatch = useAppDispatch();
 
-  const isFormValid = formState.rating > 0 && formState.text.length >= 50;
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const isValid =
+    rating > 0 &&
+    comment.length >= MIN_COMMENT_LENGTH &&
+    comment.length <= MAX_COMMENT_LENGTH;
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (isFormValid) {
-      // Здесь позже будет отправка на сервер
-      // TODO: Send form data to server
-      setFormState({ rating: 0, text: '' });
+    if (!isValid) {
+      return;
     }
+    setIsSubmitting(true);
+    dispatch(submitReview({ id: offerId, comment, rating }))
+      .unwrap()
+      .then(() => {
+        setRating(0);
+        setComment('');
+      })
+      .catch(() => {
+        // Ошибка — форма разблокируется, пользователь может попробовать снова
+      })
+      .finally(() => {
+        setIsSubmitting(false);
+      });
   };
 
   return (
@@ -42,13 +55,14 @@ function ReviewForm(): JSX.Element {
               value={star}
               id={`${star}-stars`}
               type="radio"
-              checked={formState.rating === star}
-              onChange={() => handleRatingChange(star)}
+              checked={rating === star}
+              onChange={() => setRating(star)}
+              disabled={isSubmitting}
             />
             <label
               htmlFor={`${star}-stars`}
               className="reviews__rating-label form__rating-label"
-              title={['terribly', 'badly', 'not bad', 'good', 'perfect'][5 - star]}
+              title={STAR_TITLES[star - 1]}
             >
               <svg className="form__star-image" width="37" height="33">
                 <use xlinkHref="#icon-star" />
@@ -56,22 +70,31 @@ function ReviewForm(): JSX.Element {
             </label>
           </div>
         ))}
-
       </div>
       <textarea
         className="reviews__textarea form__textarea"
         id="review"
         name="review"
         placeholder="Tell how was your stay, what you like and what can be improved"
-        value={formState.text}
-        onChange={handleTextChange}
+        value={comment}
+        minLength={MIN_COMMENT_LENGTH}
+        maxLength={MAX_COMMENT_LENGTH}
+        onChange={(e) => setComment(e.target.value)}
+        disabled={isSubmitting}
       />
-
       <div className="reviews__button-wrapper">
         <p className="reviews__help">
-          To submit review please make sure to set <span className="reviews__star">rating</span> and describe your stay with at least <b className="reviews__text-amount">50 characters</b>.
+          To submit review please make sure to set{' '}
+          <span className="reviews__star">rating</span> and describe your stay with at least{' '}
+          <b className="reviews__text-amount">{MIN_COMMENT_LENGTH} characters</b>.
         </p>
-        <button className="reviews__submit form__submit button" type="submit" disabled={!isFormValid}>Submit</button>
+        <button
+          className="reviews__submit form__submit button"
+          type="submit"
+          disabled={!isValid || isSubmitting}
+        >
+          Submit
+        </button>
       </div>
     </form>
   );
