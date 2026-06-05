@@ -1,12 +1,15 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import OffersList from '../../components/offers-list/offers-list';
 import Map from '../../components/map/map';
 import CityList from '../../components/city-list/city-list';
 import SortOptions from '../../components/sort-options/sort-options';
 import Spinner from '../../components/spinner/spinner';
-import { useAppSelector } from '../../hooks';
+import { useAppSelector, useAppDispatch } from '../../hooks';
 import { Location, Offer } from '../../types/offer';
 import { SortType } from '../../types/sort';
+import { AuthorizationStatus } from '../../types/auth';
+import { logout } from '../../store/api-actions';
 
 const CITY_CENTERS: Record<string, Location> = {
   Paris: { latitude: 48.85341, longitude: 2.3488, zoom: 12 },
@@ -31,9 +34,12 @@ const getSortedOffers = (offers: Offer[], sortType: SortType): Offer[] => {
 };
 
 function MainPage(): JSX.Element {
+  const dispatch = useAppDispatch();
   const city = useAppSelector((state) => state.city);
   const offers = useAppSelector((state) => state.offers);
   const isLoading = useAppSelector((state) => state.isLoading);
+  const authorizationStatus = useAppSelector((state) => state.authorizationStatus);
+  const userData = useAppSelector((state) => state.userData);
   const cityOffers = offers.filter((offer) => offer.city.name === city);
   const cityCenter = CITY_CENTERS[city] ?? CITY_CENTERS['Paris'];
 
@@ -45,6 +51,7 @@ function MainPage(): JSX.Element {
   }
 
   const sortedOffers = getSortedOffers(cityOffers, sortType);
+  const isAuthorized = authorizationStatus === AuthorizationStatus.Auth;
 
   return (
     <div className="page page--gray page--main">
@@ -58,19 +65,38 @@ function MainPage(): JSX.Element {
             </div>
             <nav className="header__nav">
               <ul className="header__nav-list">
-                <li className="header__nav-item user">
-                  <a className="header__nav-link header__nav-link--profile" href="/favorites">
-                    <div className="header__avatar-wrapper user__avatar-wrapper">
-                    </div>
-                    <span className="header__user-name user__name">Oliver.conner@gmail.com</span>
-                    <span className="header__favorite-count">3</span>
-                  </a>
-                </li>
-                <li className="header__nav-item">
-                  <a className="header__nav-link" href="#todo">
-                    <span className="header__signout">Sign out</span>
-                  </a>
-                </li>
+                {isAuthorized ? (
+                  <>
+                    <li className="header__nav-item user">
+                      <Link className="header__nav-link header__nav-link--profile" to="/favorites">
+                        <div className="header__avatar-wrapper user__avatar-wrapper">
+                        </div>
+                        <span className="header__user-name user__name">{userData?.email}</span>
+                        <span className="header__favorite-count">0</span>
+                      </Link>
+                    </li>
+                    <li className="header__nav-item">
+                      <button
+                        className="header__nav-link button"
+                        type="button"
+                        onClick={() => {
+                          dispatch(logout());
+                        }}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+                      >
+                        <span className="header__signout">Sign out</span>
+                      </button>
+                    </li>
+                  </>
+                ) : (
+                  <li className="header__nav-item user">
+                    <Link className="header__nav-link header__nav-link--profile" to="/login">
+                      <div className="header__avatar-wrapper user__avatar-wrapper">
+                      </div>
+                      <span className="header__login header__user-name">Sign in</span>
+                    </Link>
+                  </li>
+                )}
               </ul>
             </nav>
           </div>

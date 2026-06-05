@@ -8,7 +8,6 @@ import PrivateRoute from '../private-route/private-route';
 import { useAppSelector } from '../../hooks';
 
 function App(): JSX.Element {
-  const isAuthorized = false;
   const offers = useAppSelector((state) => state.offers);
 
   return (
@@ -19,7 +18,7 @@ function App(): JSX.Element {
         <Route
           path="/favorites"
           element={
-            <PrivateRoute isAuthorized={isAuthorized}>
+            <PrivateRoute>
               <FavoritesPage offers={offers} />
             </PrivateRoute>
           }
