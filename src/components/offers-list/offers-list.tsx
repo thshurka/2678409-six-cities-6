@@ -5,7 +5,7 @@ type OffersListProps = {
   offers: Offer[];
   block?: string;
   className?: string;
-  onActiveOfferChange?: (id: number | null) => void;
+  onActiveOfferChange?: (id: string | null) => void;
 };
 
 function OffersList({

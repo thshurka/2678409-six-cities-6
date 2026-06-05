@@ -38,7 +38,7 @@ function MainPage(): JSX.Element {
   const cityCenter = CITY_CENTERS[city] ?? CITY_CENTERS['Paris'];
 
   const [sortType, setSortType] = useState<SortType>(SortType.Popular);
-  const [activeOfferId, setActiveOfferId] = useState<number | null>(null);
+  const [activeOfferId, setActiveOfferId] = useState<string | null>(null);
 
   if (isLoading) {
     return <Spinner />;

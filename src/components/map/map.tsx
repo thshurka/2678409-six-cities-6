@@ -6,7 +6,7 @@ import { Offer, Location } from '../../types/offer';
 type MapProps = {
   offers: Offer[];
   city: Location;
-  activeOfferId?: number | null;
+  activeOfferId?: string | null;
   className?: string;
 };
 

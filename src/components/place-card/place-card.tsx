@@ -4,7 +4,7 @@ import { Offer } from '../../types/offer';
 type PlaceCardProps = {
   offer: Offer;
   block?: string;
-  onHover?: (id: number | null) => void;
+  onHover?: (id: string | null) => void;
 };
 
 function PlaceCard({ offer, block = 'cities', onHover }: PlaceCardProps): JSX.Element {
