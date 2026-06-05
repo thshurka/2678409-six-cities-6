@@ -40,7 +40,12 @@ function Map({ offers, city, activeOfferId, className = 'cities__map map' }: Map
       'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
       { attribution: '© OpenStreetMap contributors © CARTO' }
     ).addTo(mapRef.current);
-  }, [city]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    mapRef.current?.setView([city.latitude, city.longitude], 12);
+  }, [city.latitude, city.longitude]);
 
   useEffect(() => {
     const map = mapRef.current;
