@@ -23,7 +23,7 @@ function PlaceCard({ offer, block = 'cities', onHover }: PlaceCardProps): JSX.El
       )}
       <div className={`${block}__image-wrapper place-card__image-wrapper`}>
         <Link to={`/offer/${offer.id}`}>
-          <img className="place-card__image" src={offer.image} width="260" height="200" alt={offer.title} />
+          <img className="place-card__image" src={offer.previewImage} width="260" height="200" alt={offer.title} />
         </Link>
       </div>
       <div className="place-card__info">

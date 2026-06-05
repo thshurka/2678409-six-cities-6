@@ -1,6 +1,7 @@
 export type Location = {
   latitude: number;
   longitude: number;
+  zoom: number;
 };
 
 export type Offer = {
@@ -10,16 +11,16 @@ export type Offer = {
   price: number;
   rating: number;
   isPremium: boolean;
-  image: string;
+  previewImage: string;
   isFavorite: boolean;
   description: string;
   images: string[];
   bedrooms: number;
   maxAdults: number;
-  amenities: string[];
+  goods: string[];
   host: {
     name: string;
-    avatar: string;
+    avatarUrl: string;
     isPro: boolean;
   };
   city: {

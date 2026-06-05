@@ -2,15 +2,17 @@ import ReviewForm from '../../components/review-form/review-form';
 import ReviewsList from '../../components/reviews-list/reviews-list';
 import OffersList from '../../components/offers-list/offers-list';
 import Map from '../../components/map/map';
-import { mockOffers } from '../../mocks/offers';
 import { mockReviews } from '../../mocks/reviews';
+import { useAppSelector } from '../../hooks';
 import { Location } from '../../types/offer';
 
 function OfferPage(): JSX.Element {
-  const nearOffers = mockOffers.slice(0, 3);
+  const offers = useAppSelector((state) => state.offers);
+  const nearOffers = offers.slice(0, 3);
   const mapCenter: Location = {
     latitude: 52.37,
-    longitude: 4.90
+    longitude: 4.90,
+    zoom: 12,
   };
 
   return (
