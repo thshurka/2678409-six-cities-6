@@ -1,8 +1,11 @@
+import { useState } from 'react';
 import OffersList from '../../components/offers-list/offers-list';
 import Map from '../../components/map/map';
 import CityList from '../../components/city-list/city-list';
+import SortOptions from '../../components/sort-options/sort-options';
 import { useAppSelector } from '../../hooks';
-import { Location } from '../../types/offer';
+import { Location, Offer } from '../../types/offer';
+import { SortType } from '../../types/sort';
 
 const CITY_CENTERS: Record<string, Location> = {
   Paris: { latitude: 48.85341, longitude: 2.3488 },
@@ -13,11 +16,29 @@ const CITY_CENTERS: Record<string, Location> = {
   Dusseldorf: { latitude: 51.225402, longitude: 6.776314 },
 };
 
+const getSortedOffers = (offers: Offer[], sortType: SortType): Offer[] => {
+  switch (sortType) {
+    case SortType.PriceLowToHigh:
+      return offers.slice().sort((a, b) => a.price - b.price);
+    case SortType.PriceHighToLow:
+      return offers.slice().sort((a, b) => b.price - a.price);
+    case SortType.TopRatedFirst:
+      return offers.slice().sort((a, b) => b.rating - a.rating);
+    default:
+      return offers;
+  }
+};
+
 function MainPage(): JSX.Element {
   const city = useAppSelector((state) => state.city);
   const offers = useAppSelector((state) => state.offers);
   const cityOffers = offers.filter((offer) => offer.city.name === city);
   const cityCenter = CITY_CENTERS[city] ?? CITY_CENTERS['Paris'];
+
+  const [sortType, setSortType] = useState<SortType>(SortType.Popular);
+  const [activeOfferId, setActiveOfferId] = useState<number | null>(null);
+
+  const sortedOffers = getSortedOffers(cityOffers, sortType);
 
   return (
     <div className="page page--gray page--main">
@@ -62,25 +83,14 @@ function MainPage(): JSX.Element {
             <section className="cities__places places">
               <h2 className="visually-hidden">Places</h2>
               <b className="places__found">{cityOffers.length} places to stay in {city}</b>
-              <form className="places__sorting" action="#" method="get">
-                <span className="places__sorting-caption">Sort by</span>
-                <span className="places__sorting-type" tabIndex={0}>
-                  Popular
-                  <svg className="places__sorting-arrow" width="7" height="4">
-                    <use xlinkHref="#icon-arrow-select"></use>
-                  </svg>
-                </span>
-                <ul className="places__options places__options--custom places__options--opened">
-                  <li className="places__option places__option--active" tabIndex={0}>Popular</li>
-                  <li className="places__option" tabIndex={0}>Price: low to high</li>
-                  <li className="places__option" tabIndex={0}>Price: high to low</li>
-                  <li className="places__option" tabIndex={0}>Top rated first</li>
-                </ul>
-              </form>
-              <OffersList offers={cityOffers} />
+              <SortOptions currentSort={sortType} onSortChange={setSortType} />
+              <OffersList
+                offers={sortedOffers}
+                onActiveOfferChange={setActiveOfferId}
+              />
             </section>
             <div className="cities__right-section">
-              <Map offers={cityOffers} city={cityCenter} />
+              <Map offers={cityOffers} city={cityCenter} activeOfferId={activeOfferId} />
             </div>
           </div>
         </div>
