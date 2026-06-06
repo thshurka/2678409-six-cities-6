@@ -13,6 +13,7 @@ const makeInitialState = () => ({
   reviews: [],
   isOfferLoading: false,
   hasOfferLoadError: false,
+  hasOffersLoadError: false,
   favorites: [],
 });
 
@@ -35,10 +36,17 @@ describe('Reducer: dataProcess', () => {
     expect(result.isLoading).toBe(false);
   });
 
-  it('fetchOffers.rejected: снимает isLoading', () => {
+  it('fetchOffers.rejected: снимает isLoading и выставляет ошибку загрузки', () => {
     const state = { ...makeInitialState(), isLoading: true };
     const result = dataProcess(state, { type: fetchOffers.rejected.type });
     expect(result.isLoading).toBe(false);
+    expect(result.hasOffersLoadError).toBe(true);
+  });
+
+  it('fetchOffers.pending: сбрасывает ошибку загрузки', () => {
+    const state = { ...makeInitialState(), hasOffersLoadError: true };
+    const result = dataProcess(state, { type: fetchOffers.pending.type });
+    expect(result.hasOffersLoadError).toBe(false);
   });
 
   it('fetchOffer.pending: isOfferLoading = true, сбрасывает ошибку', () => {

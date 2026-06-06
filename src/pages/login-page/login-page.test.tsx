@@ -3,6 +3,8 @@ import userEvent from '@testing-library/user-event';
 import LoginPage from './login-page';
 import { withMockStore, makeMockState } from '../../utils/test-utils';
 import { login } from '../../store/api-actions';
+import { changeCity } from '../../store/slices/app-process';
+import { CITIES } from '../../const';
 
 describe('Component: LoginPage', () => {
   it('должен отрисовать форму входа', () => {
@@ -26,5 +28,17 @@ describe('Component: LoginPage', () => {
 
     const actionTypes = mockStore.getActions().map((action) => action.type);
     expect(actionTypes).toContain(login.pending.type);
+  });
+
+  it('клик по кнопке случайного города диспатчит changeCity', async () => {
+    const { withStoreComponent, mockStore } = withMockStore(<LoginPage />, makeMockState());
+    render(withStoreComponent);
+
+    const cityLink = screen.getByRole('link', { name: new RegExp(CITIES.join('|')) });
+    await userEvent.click(cityLink);
+
+    const cityActions = mockStore.getActions().filter((action) => action.type === changeCity.type) as unknown as { payload: string }[];
+    expect(cityActions).toHaveLength(1);
+    expect(CITIES).toContain(cityActions[0].payload);
   });
 });

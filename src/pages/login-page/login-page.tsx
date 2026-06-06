@@ -1,8 +1,10 @@
-import { FormEvent, useRef, useEffect, useState } from 'react';
+import { FormEvent, useRef, useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../hooks';
 import { login, fetchFavorites } from '../../store/api-actions';
+import { changeCity } from '../../store/slices/app-process';
 import { AuthorizationStatus } from '../../types/auth';
+import { CITIES } from '../../const';
 
 const PASSWORD_PATTERN = /^(?=.*[a-zA-Z])(?=.*\d).+$/;
 
@@ -14,6 +16,13 @@ function LoginPage(): JSX.Element {
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const randomCity = useMemo(() => CITIES[Math.floor(Math.random() * CITIES.length)], []);
+
+  const handleCityClick = () => {
+    dispatch(changeCity(randomCity));
+    navigate('/');
+  };
 
   useEffect(() => {
     if (authorizationStatus === AuthorizationStatus.Auth) {
@@ -91,8 +100,15 @@ function LoginPage(): JSX.Element {
           </section>
           <section className="locations locations--login locations--current">
             <div className="locations__item">
-              <a className="locations__item-link" href="/">
-                <span>Amsterdam</span>
+              <a
+                className="locations__item-link"
+                href="/"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleCityClick();
+                }}
+              >
+                <span>{randomCity}</span>
               </a>
             </div>
           </section>

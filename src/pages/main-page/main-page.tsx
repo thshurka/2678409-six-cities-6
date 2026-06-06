@@ -1,19 +1,16 @@
 import { useState, useMemo, useCallback } from 'react';
-import { Link } from 'react-router-dom';
 import OffersList from '../../components/offers-list/offers-list';
 import Map from '../../components/map/map';
 import CityList from '../../components/city-list/city-list';
 import SortOptions from '../../components/sort-options/sort-options';
 import Spinner from '../../components/spinner/spinner';
-import { useAppSelector, useAppDispatch } from '../../hooks';
+import Header from '../../components/header/header';
+import { useAppSelector } from '../../hooks';
 import { Location, Offer } from '../../types/offer';
 import { SortType } from '../../types/sort';
-import { AuthorizationStatus } from '../../types/auth';
-import { logout } from '../../store/api-actions';
 import MainEmpty from '../../components/main-empty/main-empty';
 import {
-  selectCity, selectIsLoading, selectCityOffers,
-  selectAuthorizationStatus, selectUserData, selectFavoriteCount,
+  selectCity, selectIsLoading, selectCityOffers, selectHasOffersLoadError,
 } from '../../store/selectors';
 
 const CITY_CENTERS: Record<string, Location> = {
@@ -39,13 +36,10 @@ const getSortedOffers = (offers: Offer[], sortType: SortType): Offer[] => {
 };
 
 function MainPage(): JSX.Element {
-  const dispatch = useAppDispatch();
   const city = useAppSelector(selectCity);
   const isLoading = useAppSelector(selectIsLoading);
-  const authorizationStatus = useAppSelector(selectAuthorizationStatus);
-  const userData = useAppSelector(selectUserData);
   const cityOffers = useAppSelector(selectCityOffers);
-  const favoriteCount = useAppSelector(selectFavoriteCount);
+  const hasOffersLoadError = useAppSelector(selectHasOffersLoadError);
   const cityCenter = CITY_CENTERS[city] ?? CITY_CENTERS['Paris'];
 
   const [sortType, setSortType] = useState<SortType>(SortType.Popular);
@@ -59,61 +53,28 @@ function MainPage(): JSX.Element {
     () => getSortedOffers(cityOffers, sortType),
     [cityOffers, sortType]
   );
-  const isAuthorized = authorizationStatus === AuthorizationStatus.Auth;
 
   if (isLoading) {
     return <Spinner />;
   }
 
+  if (hasOffersLoadError) {
+    return (
+      <div className="page page--gray page--main">
+        <Header isLogoActive />
+        <main className="page__main page__main--index">
+          <div className="cities__status-wrapper" style={{ margin: '60px auto', textAlign: 'center' }}>
+            <b className="cities__status">Не удалось загрузить данные с сервера</b>
+            <p className="cities__status-description">Проверьте подключение и попробуйте обновить страницу.</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="page page--gray page--main">
-      <header className="header">
-        <div className="container">
-          <div className="header__wrapper">
-            <div className="header__left">
-              <a className="header__logo-link header__logo-link--active" href="/">
-                <img className="header__logo" src="img/logo.svg" alt="6 cities logo" width="81" height="41" />
-              </a>
-            </div>
-            <nav className="header__nav">
-              <ul className="header__nav-list">
-                {isAuthorized ? (
-                  <>
-                    <li className="header__nav-item user">
-                      <Link className="header__nav-link header__nav-link--profile" to="/favorites">
-                        <div className="header__avatar-wrapper user__avatar-wrapper">
-                        </div>
-                        <span className="header__user-name user__name">{userData?.email}</span>
-                        <span className="header__favorite-count">{favoriteCount}</span>
-                      </Link>
-                    </li>
-                    <li className="header__nav-item">
-                      <button
-                        className="header__nav-link button"
-                        type="button"
-                        onClick={() => {
-                          dispatch(logout());
-                        }}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer' }}
-                      >
-                        <span className="header__signout">Sign out</span>
-                      </button>
-                    </li>
-                  </>
-                ) : (
-                  <li className="header__nav-item user">
-                    <Link className="header__nav-link header__nav-link--profile" to="/login">
-                      <div className="header__avatar-wrapper user__avatar-wrapper">
-                      </div>
-                      <span className="header__login header__user-name">Sign in</span>
-                    </Link>
-                  </li>
-                )}
-              </ul>
-            </nav>
-          </div>
-        </div>
-      </header>
+      <Header isLogoActive />
 
       <main className={`page__main page__main--index${cityOffers.length === 0 ? ' page__main--index-empty' : ''}`}>
         <h1 className="visually-hidden">Cities</h1>

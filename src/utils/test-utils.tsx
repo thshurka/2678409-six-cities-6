@@ -28,6 +28,7 @@ export const makeMockState = (initial: Partial<{
     reviews: [],
     isOfferLoading: false,
     hasOfferLoadError: false,
+    hasOffersLoadError: false,
     favorites: [],
     ...initial.DATA,
   },

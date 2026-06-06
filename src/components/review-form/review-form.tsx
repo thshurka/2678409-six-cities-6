@@ -17,6 +17,7 @@ function ReviewForm({ offerId }: ReviewFormProps): JSX.Element {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const isValid =
     rating > 0 &&
@@ -29,6 +30,7 @@ function ReviewForm({ offerId }: ReviewFormProps): JSX.Element {
       return;
     }
     setIsSubmitting(true);
+    setError(null);
     dispatch(submitReview({ id: offerId, comment, rating }))
       .unwrap()
       .then(() => {
@@ -36,7 +38,7 @@ function ReviewForm({ offerId }: ReviewFormProps): JSX.Element {
         setComment('');
       })
       .catch(() => {
-        // Ошибка — форма разблокируется, пользователь может попробовать снова
+        setError('Не удалось отправить отзыв. Попробуйте ещё раз.');
       })
       .finally(() => {
         setIsSubmitting(false);
@@ -82,6 +84,9 @@ function ReviewForm({ offerId }: ReviewFormProps): JSX.Element {
         onChange={(e) => setComment(e.target.value)}
         disabled={isSubmitting}
       />
+      {error && (
+        <p style={{ color: '#ff0000', marginBottom: '10px' }}>{error}</p>
+      )}
       <div className="reviews__button-wrapper">
         <p className="reviews__help">
           To submit review please make sure to set{' '}

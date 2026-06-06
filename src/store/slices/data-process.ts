@@ -15,6 +15,7 @@ type DataProcess = {
   reviews: Review[];
   isOfferLoading: boolean;
   hasOfferLoadError: boolean;
+  hasOffersLoadError: boolean;
   favorites: Offer[];
 };
 
@@ -26,6 +27,7 @@ const initialState: DataProcess = {
   reviews: [],
   isOfferLoading: false,
   hasOfferLoadError: false,
+  hasOffersLoadError: false,
   favorites: [],
 };
 
@@ -44,6 +46,7 @@ const dataProcess = createSlice({
     builder
       .addCase(fetchOffers.pending, (state) => {
         state.isLoading = true;
+        state.hasOffersLoadError = false;
       })
       .addCase(fetchOffers.fulfilled, (state, action) => {
         state.offers = action.payload;
@@ -51,6 +54,7 @@ const dataProcess = createSlice({
       })
       .addCase(fetchOffers.rejected, (state) => {
         state.isLoading = false;
+        state.hasOffersLoadError = true;
       })
       .addCase(fetchOffer.pending, (state) => {
         state.isOfferLoading = true;

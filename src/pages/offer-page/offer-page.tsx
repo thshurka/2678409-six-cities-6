@@ -1,18 +1,19 @@
 import { useEffect } from 'react';
-import { useParams, Navigate, Link } from 'react-router-dom';
+import { useParams, Navigate, useNavigate } from 'react-router-dom';
 import ReviewForm from '../../components/review-form/review-form';
 import ReviewsList from '../../components/reviews-list/reviews-list';
 import OffersList from '../../components/offers-list/offers-list';
 import Map from '../../components/map/map';
 import Spinner from '../../components/spinner/spinner';
+import Header from '../../components/header/header';
 import { useAppSelector, useAppDispatch } from '../../hooks';
-import { fetchOffer, fetchNearbyOffers, fetchReviews, logout } from '../../store/api-actions';
+import { fetchOffer, fetchNearbyOffers, fetchReviews, toggleFavorite } from '../../store/api-actions';
 import { clearOfferData } from '../../store/slices/data-process';
 import { AuthorizationStatus } from '../../types/auth';
 import {
   selectCurrentOffer, selectNearbyOffers, selectReviews,
   selectIsOfferLoading, selectHasOfferLoadError,
-  selectAuthorizationStatus, selectUserData,
+  selectAuthorizationStatus,
 } from '../../store/selectors';
 
 const MAX_IMAGES_COUNT = 6;
@@ -27,6 +28,7 @@ const OFFER_TYPE_LABELS: Record<string, string> = {
 function OfferPage(): JSX.Element {
   const { id } = useParams<{ id: string }>();
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
   const currentOffer = useAppSelector(selectCurrentOffer);
   const nearbyOffers = useAppSelector(selectNearbyOffers);
@@ -34,7 +36,6 @@ function OfferPage(): JSX.Element {
   const isOfferLoading = useAppSelector(selectIsOfferLoading);
   const hasOfferLoadError = useAppSelector(selectHasOfferLoadError);
   const authorizationStatus = useAppSelector(selectAuthorizationStatus);
-  const userData = useAppSelector(selectUserData);
   const isAuthorized = authorizationStatus === AuthorizationStatus.Auth;
 
   useEffect(() => {
@@ -61,53 +62,17 @@ function OfferPage(): JSX.Element {
   const mapCenter = city.location;
   const mapOffers = [...nearbyOffers, currentOffer];
 
+  const handleBookmarkClick = () => {
+    if (!isAuthorized) {
+      navigate('/login');
+      return;
+    }
+    dispatch(toggleFavorite({ id: currentOffer.id, status: isFavorite ? 0 : 1 }));
+  };
+
   return (
     <div className="page">
-      <header className="header">
-        <div className="container">
-          <div className="header__wrapper">
-            <div className="header__left">
-              <a className="header__logo-link" href="/">
-                <img className="header__logo" src="img/logo.svg" alt="6 cities logo" width="81" height="41" />
-              </a>
-            </div>
-            <nav className="header__nav">
-              <ul className="header__nav-list">
-                {isAuthorized ? (
-                  <>
-                    <li className="header__nav-item user">
-                      <Link className="header__nav-link header__nav-link--profile" to="/favorites">
-                        <div className="header__avatar-wrapper user__avatar-wrapper"></div>
-                        <span className="header__user-name user__name">{userData?.email}</span>
-                        <span className="header__favorite-count">0</span>
-                      </Link>
-                    </li>
-                    <li className="header__nav-item">
-                      <button
-                        className="header__nav-link button"
-                        type="button"
-                        onClick={() => {
-                          dispatch(logout());
-                        }}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer' }}
-                      >
-                        <span className="header__signout">Sign out</span>
-                      </button>
-                    </li>
-                  </>
-                ) : (
-                  <li className="header__nav-item user">
-                    <Link className="header__nav-link header__nav-link--profile" to="/login">
-                      <div className="header__avatar-wrapper user__avatar-wrapper"></div>
-                      <span className="header__login header__user-name">Sign in</span>
-                    </Link>
-                  </li>
-                )}
-              </ul>
-            </nav>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       <main className="page__main page__main--offer">
         <section className="offer">
@@ -132,6 +97,7 @@ function OfferPage(): JSX.Element {
                 <button
                   className={`offer__bookmark-button button${isFavorite ? ' offer__bookmark-button--active' : ''}`}
                   type="button"
+                  onClick={handleBookmarkClick}
                 >
                   <svg className="offer__bookmark-icon" width="31" height="33">
                     <use xlinkHref="#icon-bookmark"></use>

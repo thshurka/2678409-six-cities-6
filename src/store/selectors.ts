@@ -12,6 +12,7 @@ export const selectNearbyOffers = (state: RootState) => state.DATA.nearbyOffers;
 export const selectReviews = (state: RootState) => state.DATA.reviews;
 export const selectIsOfferLoading = (state: RootState) => state.DATA.isOfferLoading;
 export const selectHasOfferLoadError = (state: RootState) => state.DATA.hasOfferLoadError;
+export const selectHasOffersLoadError = (state: RootState) => state.DATA.hasOffersLoadError;
 
 // USER selectors
 export const selectAuthorizationStatus = (state: RootState) => state.USER.authorizationStatus;
