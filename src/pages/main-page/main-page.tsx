@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import OffersList from '../../components/offers-list/offers-list';
 import Map from '../../components/map/map';
@@ -10,6 +10,10 @@ import { Location, Offer } from '../../types/offer';
 import { SortType } from '../../types/sort';
 import { AuthorizationStatus } from '../../types/auth';
 import { logout } from '../../store/api-actions';
+import {
+  selectCity, selectIsLoading, selectCityOffers,
+  selectAuthorizationStatus, selectUserData,
+} from '../../store/selectors';
 
 const CITY_CENTERS: Record<string, Location> = {
   Paris: { latitude: 48.85341, longitude: 2.3488, zoom: 12 },
@@ -35,23 +39,29 @@ const getSortedOffers = (offers: Offer[], sortType: SortType): Offer[] => {
 
 function MainPage(): JSX.Element {
   const dispatch = useAppDispatch();
-  const city = useAppSelector((state) => state.city);
-  const offers = useAppSelector((state) => state.offers);
-  const isLoading = useAppSelector((state) => state.isLoading);
-  const authorizationStatus = useAppSelector((state) => state.authorizationStatus);
-  const userData = useAppSelector((state) => state.userData);
-  const cityOffers = offers.filter((offer) => offer.city.name === city);
+  const city = useAppSelector(selectCity);
+  const isLoading = useAppSelector(selectIsLoading);
+  const authorizationStatus = useAppSelector(selectAuthorizationStatus);
+  const userData = useAppSelector(selectUserData);
+  const cityOffers = useAppSelector(selectCityOffers);
   const cityCenter = CITY_CENTERS[city] ?? CITY_CENTERS['Paris'];
 
   const [sortType, setSortType] = useState<SortType>(SortType.Popular);
   const [activeOfferId, setActiveOfferId] = useState<string | null>(null);
 
+  const handleActiveOfferChange = useCallback((id: string | null) => {
+    setActiveOfferId(id);
+  }, []);
+
+  const sortedOffers = useMemo(
+    () => getSortedOffers(cityOffers, sortType),
+    [cityOffers, sortType]
+  );
+  const isAuthorized = authorizationStatus === AuthorizationStatus.Auth;
+
   if (isLoading) {
     return <Spinner />;
   }
-
-  const sortedOffers = getSortedOffers(cityOffers, sortType);
-  const isAuthorized = authorizationStatus === AuthorizationStatus.Auth;
 
   return (
     <div className="page page--gray page--main">
@@ -118,7 +128,7 @@ function MainPage(): JSX.Element {
               <SortOptions currentSort={sortType} onSortChange={setSortType} />
               <OffersList
                 offers={sortedOffers}
-                onActiveOfferChange={setActiveOfferId}
+                onActiveOfferChange={handleActiveOfferChange}
               />
             </section>
             <div className="cities__right-section">

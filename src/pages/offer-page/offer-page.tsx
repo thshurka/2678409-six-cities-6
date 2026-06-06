@@ -7,8 +7,13 @@ import Map from '../../components/map/map';
 import Spinner from '../../components/spinner/spinner';
 import { useAppSelector, useAppDispatch } from '../../hooks';
 import { fetchOffer, fetchNearbyOffers, fetchReviews, logout } from '../../store/api-actions';
-import { clearOfferData } from '../../store/action';
+import { clearOfferData } from '../../store/slices/data-process';
 import { AuthorizationStatus } from '../../types/auth';
+import {
+  selectCurrentOffer, selectNearbyOffers, selectReviews,
+  selectIsOfferLoading, selectHasOfferLoadError,
+  selectAuthorizationStatus, selectUserData,
+} from '../../store/selectors';
 
 const MAX_IMAGES_COUNT = 6;
 
@@ -23,13 +28,13 @@ function OfferPage(): JSX.Element {
   const { id } = useParams<{ id: string }>();
   const dispatch = useAppDispatch();
 
-  const currentOffer = useAppSelector((state) => state.currentOffer);
-  const nearbyOffers = useAppSelector((state) => state.nearbyOffers);
-  const reviews = useAppSelector((state) => state.reviews);
-  const isOfferLoading = useAppSelector((state) => state.isOfferLoading);
-  const hasOfferLoadError = useAppSelector((state) => state.hasOfferLoadError);
-  const authorizationStatus = useAppSelector((state) => state.authorizationStatus);
-  const userData = useAppSelector((state) => state.userData);
+  const currentOffer = useAppSelector(selectCurrentOffer);
+  const nearbyOffers = useAppSelector(selectNearbyOffers);
+  const reviews = useAppSelector(selectReviews);
+  const isOfferLoading = useAppSelector(selectIsOfferLoading);
+  const hasOfferLoadError = useAppSelector(selectHasOfferLoadError);
+  const authorizationStatus = useAppSelector(selectAuthorizationStatus);
+  const userData = useAppSelector(selectUserData);
   const isAuthorized = authorizationStatus === AuthorizationStatus.Auth;
 
   useEffect(() => {

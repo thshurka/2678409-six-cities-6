@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { Offer } from '../../types/offer';
 
@@ -54,4 +55,5 @@ function PlaceCard({ offer, block = 'cities', onHover }: PlaceCardProps): JSX.El
   );
 }
 
-export default PlaceCard;
+const PlaceCardMemo = memo(PlaceCard);
+export default PlaceCardMemo;

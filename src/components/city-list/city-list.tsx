@@ -1,6 +1,7 @@
+import { memo } from 'react';
 import { CITIES } from '../../const';
 import { useAppDispatch } from '../../hooks';
-import { changeCity } from '../../store/action';
+import { changeCity } from '../../store/slices/app-process';
 
 type CityListProps = {
   activeCity: string;
@@ -29,4 +30,5 @@ function CityList({ activeCity }: CityListProps): JSX.Element {
   );
 }
 
-export default CityList;
+const CityListMemo = memo(CityList);
+export default CityListMemo;
