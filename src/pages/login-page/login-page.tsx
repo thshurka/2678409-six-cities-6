@@ -1,7 +1,7 @@
 import { FormEvent, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../hooks';
-import { login } from '../../store/api-actions';
+import { login, fetchFavorites } from '../../store/api-actions';
 import { AuthorizationStatus } from '../../types/auth';
 
 const PASSWORD_PATTERN = /^(?=.*[a-zA-Z])(?=.*\d).+$/;
@@ -32,6 +32,7 @@ function LoginPage(): JSX.Element {
 
     dispatch(login({ login: email, password }))
       .unwrap()
+      .then(() => dispatch(fetchFavorites()))
       .then(() => navigate('/'))
       .catch(() => {
         // ошибка авторизации — форма остаётся

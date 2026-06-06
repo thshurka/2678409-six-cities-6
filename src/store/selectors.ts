@@ -17,6 +17,12 @@ export const selectHasOfferLoadError = (state: RootState) => state.DATA.hasOffer
 export const selectAuthorizationStatus = (state: RootState) => state.USER.authorizationStatus;
 export const selectUserData = (state: RootState) => state.USER.userData;
 
+export const selectFavorites = (state: RootState) => state.DATA.favorites;
+export const selectFavoriteCount = createSelector(
+  selectFavorites,
+  (favorites) => favorites.length
+);
+
 // Memoized derived selectors
 export const selectCityOffers = createSelector(
   selectOffers,

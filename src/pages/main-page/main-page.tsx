@@ -10,9 +10,10 @@ import { Location, Offer } from '../../types/offer';
 import { SortType } from '../../types/sort';
 import { AuthorizationStatus } from '../../types/auth';
 import { logout } from '../../store/api-actions';
+import MainEmpty from '../../components/main-empty/main-empty';
 import {
   selectCity, selectIsLoading, selectCityOffers,
-  selectAuthorizationStatus, selectUserData,
+  selectAuthorizationStatus, selectUserData, selectFavoriteCount,
 } from '../../store/selectors';
 
 const CITY_CENTERS: Record<string, Location> = {
@@ -44,6 +45,7 @@ function MainPage(): JSX.Element {
   const authorizationStatus = useAppSelector(selectAuthorizationStatus);
   const userData = useAppSelector(selectUserData);
   const cityOffers = useAppSelector(selectCityOffers);
+  const favoriteCount = useAppSelector(selectFavoriteCount);
   const cityCenter = CITY_CENTERS[city] ?? CITY_CENTERS['Paris'];
 
   const [sortType, setSortType] = useState<SortType>(SortType.Popular);
@@ -82,7 +84,7 @@ function MainPage(): JSX.Element {
                         <div className="header__avatar-wrapper user__avatar-wrapper">
                         </div>
                         <span className="header__user-name user__name">{userData?.email}</span>
-                        <span className="header__favorite-count">0</span>
+                        <span className="header__favorite-count">{favoriteCount}</span>
                       </Link>
                     </li>
                     <li className="header__nav-item">
@@ -113,7 +115,7 @@ function MainPage(): JSX.Element {
         </div>
       </header>
 
-      <main className="page__main page__main--index">
+      <main className={`page__main page__main--index${cityOffers.length === 0 ? ' page__main--index-empty' : ''}`}>
         <h1 className="visually-hidden">Cities</h1>
         <div className="tabs">
           <section className="locations container">
@@ -121,20 +123,24 @@ function MainPage(): JSX.Element {
           </section>
         </div>
         <div className="cities">
-          <div className="cities__places-container container">
-            <section className="cities__places places">
-              <h2 className="visually-hidden">Places</h2>
-              <b className="places__found">{cityOffers.length} places to stay in {city}</b>
-              <SortOptions currentSort={sortType} onSortChange={setSortType} />
-              <OffersList
-                offers={sortedOffers}
-                onActiveOfferChange={handleActiveOfferChange}
-              />
-            </section>
-            <div className="cities__right-section">
-              <Map offers={cityOffers} city={cityCenter} activeOfferId={activeOfferId} />
+          {cityOffers.length === 0 ? (
+            <MainEmpty city={city} />
+          ) : (
+            <div className="cities__places-container container">
+              <section className="cities__places places">
+                <h2 className="visually-hidden">Places</h2>
+                <b className="places__found">{cityOffers.length} places to stay in {city}</b>
+                <SortOptions currentSort={sortType} onSortChange={setSortType} />
+                <OffersList
+                  offers={sortedOffers}
+                  onActiveOfferChange={handleActiveOfferChange}
+                />
+              </section>
+              <div className="cities__right-section">
+                <Map offers={cityOffers} city={cityCenter} activeOfferId={activeOfferId} />
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </main>
     </div>

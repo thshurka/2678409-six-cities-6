@@ -16,6 +16,7 @@ type ReviewData = {
   rating: number;
 };
 
+
 export const fetchOffers = createAsyncThunk<Offer[], undefined, { extra: AxiosInstance }>(
   'data/fetchOffers',
   async (_arg, { extra: api }) => {
@@ -52,6 +53,22 @@ export const submitReview = createAsyncThunk<Review[], ReviewData, { extra: Axio
   'offer/submitReview',
   async ({ id, comment, rating }, { extra: api }) => {
     const { data } = await api.post<Review[]>(`/comments/${id}`, { comment, rating });
+    return data;
+  }
+);
+
+export const fetchFavorites = createAsyncThunk<Offer[], undefined, { extra: AxiosInstance }>(
+  'data/fetchFavorites',
+  async (_arg, { extra: api }) => {
+    const { data } = await api.get<Offer[]>('/favorite');
+    return data;
+  }
+);
+
+export const toggleFavorite = createAsyncThunk<Offer, { id: string; status: 0 | 1 }, { extra: AxiosInstance }>(
+  'data/toggleFavorite',
+  async ({ id, status }, { extra: api }) => {
+    const { data } = await api.post<Offer>(`/favorite/${id}/${status}`);
     return data;
   }
 );

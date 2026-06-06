@@ -1,7 +1,11 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { Offer, DetailedOffer } from '../../types/offer';
 import { Review } from '../../types/review';
-import { fetchOffers, fetchOffer, fetchNearbyOffers, fetchReviews, submitReview } from '../api-actions';
+import {
+  fetchOffers, fetchOffer, fetchNearbyOffers,
+  fetchReviews, submitReview,
+  fetchFavorites, toggleFavorite,
+} from '../api-actions';
 
 type DataProcess = {
   offers: Offer[];
@@ -11,6 +15,7 @@ type DataProcess = {
   reviews: Review[];
   isOfferLoading: boolean;
   hasOfferLoadError: boolean;
+  favorites: Offer[];
 };
 
 const initialState: DataProcess = {
@@ -21,6 +26,7 @@ const initialState: DataProcess = {
   reviews: [],
   isOfferLoading: false,
   hasOfferLoadError: false,
+  favorites: [],
 };
 
 const dataProcess = createSlice({
@@ -66,6 +72,23 @@ const dataProcess = createSlice({
       })
       .addCase(submitReview.fulfilled, (state, action) => {
         state.reviews = action.payload;
+      })
+      .addCase(fetchFavorites.fulfilled, (state, action) => {
+        state.favorites = action.payload;
+      })
+      .addCase(toggleFavorite.fulfilled, (state, action) => {
+        const updated = action.payload;
+        // Обновляем в общем списке предложений
+        const idx = state.offers.findIndex((o) => o.id === updated.id);
+        if (idx !== -1) {
+          state.offers[idx] = updated;
+        }
+        // Обновляем список избранного
+        if (updated.isFavorite) {
+          state.favorites = [...state.favorites.filter((o) => o.id !== updated.id), updated];
+        } else {
+          state.favorites = state.favorites.filter((o) => o.id !== updated.id);
+        }
       });
   },
 });
