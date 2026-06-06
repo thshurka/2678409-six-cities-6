@@ -6,7 +6,7 @@ import { Review } from '../types/review';
 import { saveToken, dropToken } from '../services/token';
 
 type LoginCredentials = {
-  login: string;
+  email: string;
   password: string;
 };
 

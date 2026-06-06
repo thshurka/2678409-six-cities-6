@@ -1,4 +1,4 @@
-import { FormEvent, useRef, useEffect } from 'react';
+import { FormEvent, useRef, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../hooks';
 import { login, fetchFavorites } from '../../store/api-actions';
@@ -13,6 +13,7 @@ function LoginPage(): JSX.Element {
 
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (authorizationStatus === AuthorizationStatus.Auth) {
@@ -22,20 +23,22 @@ function LoginPage(): JSX.Element {
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError(null);
 
     const email = emailRef.current?.value ?? '';
     const password = passwordRef.current?.value ?? '';
 
     if (!PASSWORD_PATTERN.test(password)) {
+      setError('Пароль должен содержать минимум одну букву и одну цифру');
       return;
     }
 
-    dispatch(login({ login: email, password }))
+    dispatch(login({ email, password }))
       .unwrap()
       .then(() => dispatch(fetchFavorites()))
       .then(() => navigate('/'))
       .catch(() => {
-        // ошибка авторизации — форма остаётся
+        setError('Не удалось войти. Проверьте email и пароль');
       });
   };
 
@@ -80,6 +83,9 @@ function LoginPage(): JSX.Element {
                   required
                 />
               </div>
+              {error && (
+                <p className="login__error" style={{ color: '#ff0000', marginBottom: '15px' }}>{error}</p>
+              )}
               <button className="login__submit form__submit button" type="submit">Sign in</button>
             </form>
           </section>
