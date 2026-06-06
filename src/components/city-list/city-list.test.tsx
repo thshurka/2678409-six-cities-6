@@ -1,23 +1,26 @@
 import { render, screen } from '@testing-library/react';
-import { Provider } from 'react-redux';
-import { configureStore } from '@reduxjs/toolkit';
+import userEvent from '@testing-library/user-event';
 import CityList from './city-list';
 import { CITIES } from '../../const';
+import { withMockStore, makeMockState } from '../../utils/test-utils';
+import { changeCity } from '../../store/slices/app-process';
 
 describe('Component: CityList', () => {
-  const store = configureStore({
-    reducer: { APP: (state: { city: string } = { city: 'Paris' }) => state },
-  });
-
   it('должен отрисовать все шесть городов', () => {
-    render(
-      <Provider store={store}>
-        <CityList activeCity="Paris" />
-      </Provider>
-    );
+    const { withStoreComponent } = withMockStore(<CityList activeCity="Paris" />, makeMockState());
+    render(withStoreComponent);
 
     CITIES.forEach((city) => {
       expect(screen.getByText(city)).toBeInTheDocument();
     });
+  });
+
+  it('клик по городу диспатчит changeCity с выбранным городом', async () => {
+    const { withStoreComponent, mockStore } = withMockStore(<CityList activeCity="Paris" />, makeMockState());
+    render(withStoreComponent);
+
+    await userEvent.click(screen.getByText('Amsterdam'));
+
+    expect(mockStore.getActions()).toContainEqual(changeCity('Amsterdam'));
   });
 });
